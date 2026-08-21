@@ -7,10 +7,10 @@ import {
   StockArmazem,
   UserProfile,
 } from "./types";
+import { PIN_INICIAL_EQUIPA_LIMPEZA } from "./config";
 
 export const USERS_SEED: UserProfile[] = [
-  { id: "u1", nome: "Lilith", email: "lilith@empresa.pt", role: "gestao" },
-  { id: "u2", nome: "Marido", email: "marido@empresa.pt", role: "gestao" },
+  { id: "u1", nome: "Indira", email: "indira@empresa.pt", role: "gestao" },
   {
     id: "u3",
     nome: "Administrativa",
@@ -22,7 +22,7 @@ export const USERS_SEED: UserProfile[] = [
     nome: "Equipa de limpeza (Modo Saída Rápida)",
     email: "equipa@empresa.pt",
     role: "saida_rapida",
-    pin: "1234",
+    pin: PIN_INICIAL_EQUIPA_LIMPEZA,
   },
 ];
 
