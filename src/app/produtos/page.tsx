@@ -90,7 +90,7 @@ export default function ProdutosPage() {
               <tr>
                 <th className="px-3 py-2 font-medium">Produto</th>
                 <th className="px-3 py-2 font-medium">Categoria</th>
-                <th className="px-3 py-2 font-medium">Unidáde</th>
+                <th className="px-3 py-2 font-medium">Unidade</th>
                 <th className="px-3 py-2 font-medium">Rastreio</th>
                 <th className="px-3 py-2 font-medium text-right">Stock mínimo</th>
               </tr>
