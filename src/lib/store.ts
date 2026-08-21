@@ -20,6 +20,7 @@ import {
   MovimentoStock,
   PrecoLoja,
   Produto,
+  Role,
   StockArmazem,
   UserProfile,
 } from "./types";
@@ -84,6 +85,9 @@ interface AppState extends DadosPartilhados {
     preco: number,
     automatico: boolean
   ) => void;
+  adicionarUtilizador: (nome: string, role: Role) => UserProfile;
+  removerUtilizador: (id: string) => void;
+  atualizarPinSaidaRapida: (pin: string) => void;
 }
 
 function garantirListaAberta(listas: ListaCompras[]): {
@@ -378,6 +382,34 @@ export const useAppStore = create<AppState>()(
             ],
           };
         });
+      },
+
+      adicionarUtilizador: (nome, role) => {
+        const id = `u-${Date.now()}`;
+        const email = `${nome
+          .trim()
+          .toLowerCase()
+          .normalize("NFD")
+          .replace(new RegExp("[\\u0300-\\u036f]", "g"), "")
+          .replace(/[^a-z0-9]+/g, ".")
+          .replace(/^\.+|\.+$/g, "")}@empresa.pt`;
+        const novoUtilizador: UserProfile = { id, nome: nome.trim(), email, role };
+        set((state) => ({ utilizadores: [...state.utilizadores, novoUtilizador] }));
+        return novoUtilizador;
+      },
+
+      removerUtilizador: (id) => {
+        set((state) => ({
+          utilizadores: state.utilizadores.filter((u) => u.id !== id),
+        }));
+      },
+
+      atualizarPinSaidaRapida: (pin) => {
+        set((state) => ({
+          utilizadores: state.utilizadores.map((u) =>
+            u.role === "saida_rapida" ? { ...u, pin } : u
+          ),
+        }));
       },
     })
 );
