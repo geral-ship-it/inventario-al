@@ -3,6 +3,7 @@
 import { usePathname, useRouter } from "next/navigation";
 import { useState } from "react";
 import { useAppStore } from "@/lib/store";
+import { useLocalStore } from "@/lib/local-store";
 import { formatarData, formatarPreco } from "@/lib/format";
 
 export default function ArrecadacaoDetalheClient({ id: idInicial }: { id: string }) {
@@ -22,6 +23,7 @@ export default function ArrecadacaoDetalheClient({ id: idInicial }: { id: string
   const resolverFalta = useAppStore((s) => s.resolverFalta);
   const atualizarChecklistArrecadacao = useAppStore((s) => s.atualizarChecklistArrecadacao);
   const associarApartamento = useAppStore((s) => s.associarApartamento);
+  const acessoRestrito = useLocalStore((s) => s.nivelAcesso) === "arrecadacoes";
 
   const arrecadacao = arrecadacoes.find((a) => a.id === id);
 
@@ -86,19 +88,25 @@ export default function ArrecadacaoDetalheClient({ id: idInicial }: { id: string
                 <li key={item.produtoId} className="px-4 py-2 flex items-center justify-between text-sm">
                   <span>{produto?.nome}</span>
                   <div className="flex items-center gap-2">
-                    <input
-                      type="number"
-                      min={0}
-                      defaultValue={item.quantidadeReferencia}
-                      onBlur={(e) =>
-                        atualizarChecklistArrecadacao(
-                          arrecadacao.id,
-                          item.produtoId,
-                          Number(e.target.value)
-                        )
-                      }
-                      className="w-16 border border-slate-200 rounded-md px-1.5 py-1 text-right"
-                    />
+                    {acessoRestrito ? (
+                      <span className="w-16 text-right text-slate-500">
+                        {item.quantidadeReferencia}
+                      </span>
+                    ) : (
+                      <input
+                        type="number"
+                        min={0}
+                        defaultValue={item.quantidadeReferencia}
+                        onBlur={(e) =>
+                          atualizarChecklistArrecadacao(
+                            arrecadacao.id,
+                            item.produtoId,
+                            Number(e.target.value)
+                          )
+                        }
+                        className="w-16 border border-slate-200 rounded-md px-1.5 py-1 text-right"
+                      />
+                    )}
                     <button
                       className="text-xs text-amber-600 font-medium"
                       onClick={() => {
@@ -113,44 +121,46 @@ export default function ArrecadacaoDetalheClient({ id: idInicial }: { id: string
               );
             })}
           </ul>
-          <div className="p-4 border-t border-slate-100 flex gap-2">
-            <select
-              value={produtoParaAdicionar}
-              onChange={(e) => setProdutoParaAdicionar(e.target.value)}
-              className="flex-1 border border-slate-200 rounded-md px-2 py-1.5 text-sm"
-            >
-              <option value="">Adicionar produto à checklist…</option>
-              {produtos
-                .filter((p) => !arrecadacao.checklist.some((c) => c.produtoId === p.id))
-                .map((p) => (
-                  <option key={p.id} value={p.id}>
-                    {p.nome}
-                  </option>
-                ))}
-            </select>
-            <input
-              type="number"
-              min={1}
-              value={quantidadeParaAdicionar}
-              onChange={(e) => setQuantidadeParaAdicionar(Number(e.target.value))}
-              className="w-16 border border-slate-200 rounded-md px-1.5 py-1.5 text-sm"
-            />
-            <button
-              onClick={() => {
-                if (!produtoParaAdicionar) return;
-                atualizarChecklistArrecadacao(
-                  arrecadacao.id,
-                  produtoParaAdicionar,
-                  quantidadeParaAdicionar
-                );
-                setProdutoParaAdicionar("");
-                setQuantidadeParaAdicionar(1);
-              }}
-              className="rounded-md bg-slate-900 text-white text-sm px-3 hover:bg-slate-700"
-            >
-              +
-            </button>
-          </div>
+          {!acessoRestrito && (
+            <div className="p-4 border-t border-slate-100 flex gap-2">
+              <select
+                value={produtoParaAdicionar}
+                onChange={(e) => setProdutoParaAdicionar(e.target.value)}
+                className="flex-1 border border-slate-200 rounded-md px-2 py-1.5 text-sm"
+              >
+                <option value="">Adicionar produto à checklist…</option>
+                {produtos
+                  .filter((p) => !arrecadacao.checklist.some((c) => c.produtoId === p.id))
+                  .map((p) => (
+                    <option key={p.id} value={p.id}>
+                      {p.nome}
+                    </option>
+                  ))}
+              </select>
+              <input
+                type="number"
+                min={1}
+                value={quantidadeParaAdicionar}
+                onChange={(e) => setQuantidadeParaAdicionar(Number(e.target.value))}
+                className="w-16 border border-slate-200 rounded-md px-1.5 py-1.5 text-sm"
+              />
+              <button
+                onClick={() => {
+                  if (!produtoParaAdicionar) return;
+                  atualizarChecklistArrecadacao(
+                    arrecadacao.id,
+                    produtoParaAdicionar,
+                    quantidadeParaAdicionar
+                  );
+                  setProdutoParaAdicionar("");
+                  setQuantidadeParaAdicionar(1);
+                }}
+                className="rounded-md bg-slate-900 text-white text-sm px-3 hover:bg-slate-700"
+              >
+                +
+              </button>
+            </div>
+          )}
         </div>
 
         <div className="space-y-4">
@@ -187,58 +197,62 @@ export default function ArrecadacaoDetalheClient({ id: idInicial }: { id: string
             )}
           </div>
 
-          <div className="bg-white rounded-lg border border-slate-200">
-            <div className="px-4 py-3 border-b border-slate-100 flex items-center justify-between">
-              <h2 className="font-medium">Gasto acumulado</h2>
-              <span className="text-sm font-semibold">{formatarPreco(gastoTotal)}</span>
-            </div>
-            {Object.keys(gastoPorMes).length === 0 ? (
-              <p className="p-4 text-sm text-slate-500">
-                Ainda sem compras concluídas atribuídas a esta arrecadação.
+          {!acessoRestrito && (
+            <div className="bg-white rounded-lg border border-slate-200">
+              <div className="px-4 py-3 border-b border-slate-100 flex items-center justify-between">
+                <h2 className="font-medium">Gasto acumulado</h2>
+                <span className="text-sm font-semibold">{formatarPreco(gastoTotal)}</span>
+              </div>
+              {Object.keys(gastoPorMes).length === 0 ? (
+                <p className="p-4 text-sm text-slate-500">
+                  Ainda sem compras concluídas atribuídas a esta arrecadação.
+                </p>
+              ) : (
+                <ul className="divide-y divide-slate-100">
+                  {Object.entries(gastoPorMes).map(([mes, valor]) => (
+                    <li key={mes} className="px-4 py-2 text-sm flex items-center justify-between">
+                      <span className="capitalize">{mes}</span>
+                      <span className="font-medium">{formatarPreco(valor)}</span>
+                    </li>
+                  ))}
+                </ul>
+              )}
+              <p className="px-4 pb-3 text-[11px] text-slate-400">
+                Calculado a partir do preço registado em cada compra concluída da lista quinzenal
+                destinada a esta arrecadação.
               </p>
-            ) : (
-              <ul className="divide-y divide-slate-100">
-                {Object.entries(gastoPorMes).map(([mes, valor]) => (
-                  <li key={mes} className="px-4 py-2 text-sm flex items-center justify-between">
-                    <span className="capitalize">{mes}</span>
-                    <span className="font-medium">{formatarPreco(valor)}</span>
-                  </li>
-                ))}
-              </ul>
-            )}
-            <p className="px-4 pb-3 text-[11px] text-slate-400">
-              Calculado a partir do preço registado em cada compra concluída da lista quinzenal
-              destinada a esta arrecadação.
-            </p>
-          </div>
-
-          <div className="bg-white rounded-lg border border-slate-200 p-4">
-            <h2 className="font-medium text-sm mb-3">Apartamentos associados</h2>
-            <div className="flex gap-2">
-              <select
-                value={apartamentoParaAssociar}
-                onChange={(e) => setApartamentoParaAssociar(e.target.value)}
-                className="flex-1 border border-slate-200 rounded-md px-2 py-1.5 text-sm"
-              >
-                <option value="">Associar apartamento…</option>
-                {apartamentosDisponiveis.map((a) => (
-                  <option key={a.id} value={a.id}>
-                    {a.nome}
-                  </option>
-                ))}
-              </select>
-              <button
-                onClick={() => {
-                  if (!apartamentoParaAssociar) return;
-                  associarApartamento(arrecadacao.id, apartamentoParaAssociar);
-                  setApartamentoParaAssociar("");
-                }}
-                className="rounded-md bg-slate-900 text-white text-sm px-3 hover:bg-slate-700"
-              >
-                +
-              </button>
             </div>
-          </div>
+          )}
+
+          {!acessoRestrito && (
+            <div className="bg-white rounded-lg border border-slate-200 p-4">
+              <h2 className="font-medium text-sm mb-3">Apartamentos associados</h2>
+              <div className="flex gap-2">
+                <select
+                  value={apartamentoParaAssociar}
+                  onChange={(e) => setApartamentoParaAssociar(e.target.value)}
+                  className="flex-1 border border-slate-200 rounded-md px-2 py-1.5 text-sm"
+                >
+                  <option value="">Associar apartamento…</option>
+                  {apartamentosDisponiveis.map((a) => (
+                    <option key={a.id} value={a.id}>
+                      {a.nome}
+                    </option>
+                  ))}
+                </select>
+                <button
+                  onClick={() => {
+                    if (!apartamentoParaAssociar) return;
+                    associarApartamento(arrecadacao.id, apartamentoParaAssociar);
+                    setApartamentoParaAssociar("");
+                  }}
+                  className="rounded-md bg-slate-900 text-white text-sm px-3 hover:bg-slate-700"
+                >
+                  +
+                </button>
+              </div>
+            </div>
+          )}
 
           {mensagem && <p className="text-xs text-slate-500">{mensagem}</p>}
         </div>
