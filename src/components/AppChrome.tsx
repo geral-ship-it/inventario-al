@@ -2,6 +2,7 @@
 
 import { usePathname } from "next/navigation";
 import Nav from "./Nav";
+import AppGate from "./AppGate";
 
 export default function AppChrome({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
@@ -13,12 +14,12 @@ export default function AppChrome({ children }: { children: React.ReactNode }) {
   }
 
   return (
-    <>
+    <AppGate>
       <Nav />
       <main className="flex-1 max-w-6xl w-full mx-auto px-4 py-6">{children}</main>
       <footer className="text-center text-xs text-slate-400 py-4">
         Dados sincronizados entre todos os dispositivos e utilizadores.
       </footer>
-    </>
+    </AppGate>
   );
 }
