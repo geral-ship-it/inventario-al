@@ -24,6 +24,12 @@ export const USERS_SEED: UserProfile[] = [
     role: "saida_rapida",
     pin: PIN_INICIAL_EQUIPA_LIMPEZA,
   },
+  {
+    id: "u5",
+    nome: "Equipa de arrecadações",
+    email: "arrecadacoes@empresa.pt",
+    role: "arrecadacoes",
+  },
 ];
 
 // Produtos cujo QR só existe na caixa/embalagem (não em cada unidade
