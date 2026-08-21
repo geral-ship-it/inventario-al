@@ -9,6 +9,7 @@ import {
   STOCK_ARMAZEM_SEED,
   USERS_SEED,
 } from "@/lib/seed-data";
+import { SENHA_INICIAL_ARRECADACOES } from "@/lib/config";
 import type { DadosPartilhados } from "@/lib/store";
 
 // Este endpoint tem de correr sempre no servidor (nunca ser pré-otimizado
@@ -35,6 +36,7 @@ function estadoInicial(): DadosPartilhados {
     precos: PRECOS_SEED,
     utilizadores: USERS_SEED,
     gastosArrecadacao: [],
+    senhaArrecadacoes: SENHA_INICIAL_ARRECADACOES,
   };
 }
 
