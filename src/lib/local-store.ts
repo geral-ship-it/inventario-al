@@ -16,14 +16,21 @@ import { SENHA_ACESSO_COMPLETO } from "./config";
 const UTILIZADOR_POR_OMISSAO =
   USERS_SEED.find((u) => u.role === "administrativa")?.id ?? USERS_SEED[0].id;
 
+type NivelAcesso = "completo" | "arrecadacoes" | null;
+
 interface LocalState {
   utilizadorAtualId: string;
   modoRapidoUtilizadorId: string | null;
   acessoLiberado: boolean;
+  nivelAcesso: NivelAcesso;
   setUtilizadorAtual: (id: string) => void;
   entrarModoRapido: (pin: string, utilizadores: UserProfile[]) => boolean;
   sairModoRapido: () => void;
-  desbloquear: (password: string) => boolean;
+  desbloquear: (
+    password: string,
+    senhaArrecadacoes: string,
+    utilizadores: UserProfile[]
+  ) => boolean;
   bloquear: () => void;
 }
 
@@ -33,6 +40,7 @@ export const useLocalStore = create<LocalState>()(
       utilizadorAtualId: UTILIZADOR_POR_OMISSAO,
       modoRapidoUtilizadorId: null,
       acessoLiberado: false,
+      nivelAcesso: null,
 
       setUtilizadorAtual: (id) => set({ utilizadorAtualId: id }),
 
@@ -47,13 +55,26 @@ export const useLocalStore = create<LocalState>()(
 
       sairModoRapido: () => set({ modoRapidoUtilizadorId: null }),
 
-      desbloquear: (password) => {
-        if (password !== SENHA_ACESSO_COMPLETO) return false;
-        set({ acessoLiberado: true });
-        return true;
+      desbloquear: (password, senhaArrecadacoes, utilizadores) => {
+        if (SENHA_ACESSO_COMPLETO && password === SENHA_ACESSO_COMPLETO) {
+          set({ acessoLiberado: true, nivelAcesso: "completo" });
+          return true;
+        }
+        if (senhaArrecadacoes && password === senhaArrecadacoes) {
+          const equipaArrecadacoes = utilizadores.find(
+            (u) => u.role === "arrecadacoes"
+          );
+          set((state) => ({
+            acessoLiberado: true,
+            nivelAcesso: "arrecadacoes",
+            utilizadorAtualId: equipaArrecadacoes?.id ?? state.utilizadorAtualId,
+          }));
+          return true;
+        }
+        return false;
       },
 
-      bloquear: () => set({ acessoLiberado: false }),
+      bloquear: () => set({ acessoLiberado: false, nivelAcesso: null }),
     }),
     { name: "inventario-al-dispositivo" }
   )
