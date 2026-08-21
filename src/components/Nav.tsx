@@ -12,6 +12,7 @@ const LINKS = [
   { href: "/compras", label: "Lista de Compras" },
   { href: "/produtos", label: "Produtos" },
   { href: "/precos", label: "Preços" },
+  { href: "/utilizadores", label: "Gerir acesso" },
 ];
 
 export default function Nav() {
@@ -19,6 +20,7 @@ export default function Nav() {
   const utilizadores = useAppStore((s) => s.utilizadores);
   const utilizadorAtualId = useLocalStore((s) => s.utilizadorAtualId);
   const setUtilizadorAtual = useLocalStore((s) => s.setUtilizadorAtual);
+  const bloquear = useLocalStore((s) => s.bloquear);
 
   // O perfil "saída rápida" entra pelo /scan com PIN, não por aqui.
   const utilizadoresApp = utilizadores.filter((u) => u.role !== "saida_rapida");
@@ -48,6 +50,13 @@ export default function Nav() {
                 </option>
               ))}
             </select>
+            <button
+              onClick={bloquear}
+              title="Bloquear o acesso completo neste dispositivo"
+              className="text-xs font-medium text-slate-400 hover:text-slate-600 underline whitespace-nowrap"
+            >
+              Bloquear
+            </button>
           </div>
         </div>
         <nav className="flex gap-1 overflow-x-auto pb-2 -mx-1">
