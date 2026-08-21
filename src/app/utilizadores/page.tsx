@@ -25,11 +25,14 @@ export default function UtilizadoresPage() {
   const adicionarUtilizador = useAppStore((s) => s.adicionarUtilizador);
   const removerUtilizador = useAppStore((s) => s.removerUtilizador);
   const atualizarPinSaidaRapida = useAppStore((s) => s.atualizarPinSaidaRapida);
+  const senhaArrecadacoes = useAppStore((s) => s.senhaArrecadacoes);
+  const atualizarSenhaArrecadacoes = useAppStore((s) => s.atualizarSenhaArrecadacoes);
 
   const pessoasAcessoCompleto = utilizadores.filter(
     (u) => u.role === "gestao" || u.role === "administrativa"
   );
   const equipaLimpeza = utilizadores.find((u) => u.role === "saida_rapida");
+  const equipaArrecadacoes = utilizadores.find((u) => u.role === "arrecadacoes");
 
   const [novoNome, setNovoNome] = useState("");
   const [novoRole, setNovoRole] = useState<Role>("administrativa");
@@ -40,6 +43,9 @@ export default function UtilizadoresPage() {
 
   const [novoPin, setNovoPin] = useState(equipaLimpeza?.pin ?? "");
   const [pinGuardado, setPinGuardado] = useState(false);
+
+  const [novaSenhaArrecadacoes, setNovaSenhaArrecadacoes] = useState(senhaArrecadacoes);
+  const [senhaArrecadacoesGuardada, setSenhaArrecadacoesGuardada] = useState(false);
 
   function textoConvite(nome: string) {
     return `Olá ${nome}! Já tens acesso à app de inventário: ${URL_APP} — a password é: ${SENHA_ACESSO_COMPLETO}`;
@@ -60,14 +66,22 @@ export default function UtilizadoresPage() {
     setTimeout(() => setPinGuardado(false), 2000);
   }
 
+  function guardarSenhaArrecadacoes() {
+    if (!novaSenhaArrecadacoes.trim()) return;
+    atualizarSenhaArrecadacoes(novaSenhaArrecadacoes.trim());
+    setSenhaArrecadacoesGuardada(true);
+    setTimeout(() => setSenhaArrecadacoesGuardada(false), 2000);
+  }
+
   return (
     <div className="space-y-6 max-w-2xl">
       <div>
         <h1 className="text-xl font-semibold">Gerir acesso</h1>
         <p className="text-sm text-slate-500">
-          A app tem dois níveis de acesso: uma password partilhada para quem gere tudo
-          (Gestão / Administrativa), e um PIN partilhado para a equipa de limpeza, que só
-          entra no ecrã de leitura de QR (Modo Saída Rápida).
+          A app tem três níveis de acesso: uma password partilhada para quem gere tudo
+          (Gestão / Administrativa), uma password partilhada para a equipa de arrecadações
+          (só vê arrecadações), e um PIN partilhado para a equipa de limpeza, que só entra
+          no ecrã de leitura de QR (Modo Saída Rápida).
         </p>
       </div>
 
@@ -164,6 +178,37 @@ export default function UtilizadoresPage() {
               </button>
             </div>
           )}
+        </div>
+      </div>
+
+      <div className="bg-white rounded-lg border border-slate-200 p-4 space-y-3">
+        <h2 className="font-medium text-sm">Equipa de arrecadações</h2>
+        <p className="text-xs text-slate-500">
+          Quem entrar com esta password só vê a secção de Arrecadações: os nomes, os
+          produtos de cada uma e o botão para reportar o que falta (dar baixa). Não vê
+          Produtos, Preços, Lista de Compras nem o Painel geral. As ações ficam registadas
+          coletivamente como &ldquo;{equipaArrecadacoes?.nome ?? "Equipa de arrecadações"}&rdquo;.
+        </p>
+        <div className="flex flex-col sm:flex-row gap-2 items-start sm:items-center">
+          <span className="text-xs text-slate-400">Link a partilhar:</span>
+          <code className="bg-slate-50 border border-slate-200 rounded-md px-3 py-1.5 text-sm font-mono">
+            {URL_APP}
+          </code>
+        </div>
+        <div className="flex flex-col sm:flex-row gap-2 items-start sm:items-center">
+          <span className="text-xs text-slate-400">Password atual:</span>
+          <input
+            type="text"
+            value={novaSenhaArrecadacoes}
+            onChange={(e) => setNovaSenhaArrecadacoes(e.target.value)}
+            className="border border-slate-200 rounded-md px-2 py-1.5 text-sm w-40"
+          />
+          <button
+            onClick={guardarSenhaArrecadacoes}
+            className="rounded-md border border-slate-300 text-sm font-medium px-3 py-1.5 hover:bg-slate-50"
+          >
+            {senhaArrecadacoesGuardada ? "Guardada!" : "Guardar nova password"}
+          </button>
         </div>
       </div>
 
