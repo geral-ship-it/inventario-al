@@ -10,6 +10,7 @@ import {
   STOCK_ARMAZEM_SEED,
   USERS_SEED,
 } from "./seed-data";
+import { SENHA_INICIAL_ARRECADACOES } from "./config";
 import {
   Apartamento,
   Arrecadacao,
@@ -40,6 +41,10 @@ export interface DadosPartilhados {
   precos: PrecoLoja[];
   utilizadores: UserProfile[];
   gastosArrecadacao: GastoArrecadacao[];
+  // Password partilhada do nível de acesso "Arrecadações" (restrito só a
+  // essa secção). Guardada aqui (não como env var fixa) para poder ser
+  // trocada na página "Gerir acesso" sem voltar a publicar o site.
+  senhaArrecadacoes: string;
 }
 
 interface AppState extends DadosPartilhados {
@@ -88,6 +93,7 @@ interface AppState extends DadosPartilhados {
   adicionarUtilizador: (nome: string, role: Role) => UserProfile;
   removerUtilizador: (id: string) => void;
   atualizarPinSaidaRapida: (pin: string) => void;
+  atualizarSenhaArrecadacoes: (senha: string) => void;
 }
 
 function garantirListaAberta(listas: ListaCompras[]): {
@@ -119,6 +125,7 @@ export const useAppStore = create<AppState>()(
       precos: PRECOS_SEED,
       utilizadores: USERS_SEED,
       gastosArrecadacao: [],
+      senhaArrecadacoes: SENHA_INICIAL_ARRECADACOES,
 
       hydrate: (dados) => set(dados),
 
@@ -411,6 +418,10 @@ export const useAppStore = create<AppState>()(
           ),
         }));
       },
+
+      atualizarSenhaArrecadacoes: (senha) => {
+        set({ senhaArrecadacoes: senha });
+      },
     })
 );
 
@@ -428,6 +439,7 @@ export function extrairDadosPartilhados(state: AppState): DadosPartilhados {
     precos,
     utilizadores,
     gastosArrecadacao,
+    senhaArrecadacoes,
   } = state;
   return {
     produtos,
@@ -440,5 +452,6 @@ export function extrairDadosPartilhados(state: AppState): DadosPartilhados {
     precos,
     utilizadores,
     gastosArrecadacao,
+    senhaArrecadacoes,
   };
 }
