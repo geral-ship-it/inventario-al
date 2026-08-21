@@ -2,10 +2,13 @@
 
 import { useState } from "react";
 import { useLocalStore } from "@/lib/local-store";
+import { useAppStore } from "@/lib/store";
 
 export default function AppGate({ children }: { children: React.ReactNode }) {
   const acessoLiberado = useLocalStore((s) => s.acessoLiberado);
   const desbloquear = useLocalStore((s) => s.desbloquear);
+  const senhaArrecadacoes = useAppStore((s) => s.senhaArrecadacoes);
+  const utilizadores = useAppStore((s) => s.utilizadores);
 
   const [password, setPassword] = useState("");
   const [erro, setErro] = useState<string | null>(null);
@@ -15,7 +18,7 @@ export default function AppGate({ children }: { children: React.ReactNode }) {
   }
 
   function tentar() {
-    if (desbloquear(password)) {
+    if (desbloquear(password, senhaArrecadacoes, utilizadores)) {
       setErro(null);
     } else {
       setErro("Password incorreta.");
