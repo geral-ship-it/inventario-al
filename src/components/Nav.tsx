@@ -21,9 +21,14 @@ export default function Nav() {
   const utilizadorAtualId = useLocalStore((s) => s.utilizadorAtualId);
   const setUtilizadorAtual = useLocalStore((s) => s.setUtilizadorAtual);
   const bloquear = useLocalStore((s) => s.bloquear);
+  const nivelAcesso = useLocalStore((s) => s.nivelAcesso);
+  const acessoRestrito = nivelAcesso === "arrecadacoes";
 
   // O perfil "saída rápida" entra pelo /scan com PIN, não por aqui.
   const utilizadoresApp = utilizadores.filter((u) => u.role !== "saida_rapida");
+  const linksVisiveis = acessoRestrito
+    ? LINKS.filter((link) => link.href === "/arrecadacoes")
+    : LINKS;
 
   return (
     <header className="border-b border-slate-200 bg-white sticky top-0 z-20">
@@ -33,23 +38,27 @@ export default function Nav() {
             Inventário AL
           </div>
           <div className="flex items-center gap-2">
-            <Link
-              href="/scan"
-              className="text-xs font-medium border border-slate-300 rounded-md px-2 py-1.5 text-slate-600 hover:bg-slate-100 whitespace-nowrap"
-            >
-              Modo Saída Rápida
-            </Link>
-            <select
-              className="text-sm border border-slate-200 rounded-md px-2 py-1 bg-slate-50"
-              value={utilizadorAtualId}
-              onChange={(e) => setUtilizadorAtual(e.target.value)}
-            >
-              {utilizadoresApp.map((u) => (
-                <option key={u.id} value={u.id}>
-                  {u.nome} ({u.role})
-                </option>
-              ))}
-            </select>
+            {!acessoRestrito && (
+              <Link
+                href="/scan"
+                className="text-xs font-medium border border-slate-300 rounded-md px-2 py-1.5 text-slate-600 hover:bg-slate-100 whitespace-nowrap"
+              >
+                Modo Saída Rápida
+              </Link>
+            )}
+            {!acessoRestrito && (
+              <select
+                className="text-sm border border-slate-200 rounded-md px-2 py-1 bg-slate-50"
+                value={utilizadorAtualId}
+                onChange={(e) => setUtilizadorAtual(e.target.value)}
+              >
+                {utilizadoresApp.map((u) => (
+                  <option key={u.id} value={u.id}>
+                    {u.nome} ({u.role})
+                  </option>
+                ))}
+              </select>
+            )}
             <button
               onClick={bloquear}
               title="Bloquear o acesso completo neste dispositivo"
@@ -60,7 +69,7 @@ export default function Nav() {
           </div>
         </div>
         <nav className="flex gap-1 overflow-x-auto pb-2 -mx-1">
-          {LINKS.map((link) => {
+          {linksVisiveis.map((link) => {
             const active =
               link.href === "/" ? pathname === "/" : pathname?.startsWith(link.href);
             return (
