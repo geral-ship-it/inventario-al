@@ -3,12 +3,14 @@
 import { useState } from "react";
 import Link from "next/link";
 import { useAppStore } from "@/lib/store";
+import { useLocalStore } from "@/lib/local-store";
 
 export default function ArrecadacoesPage() {
   const arrecadacoes = useAppStore((s) => s.arrecadacoes);
   const apartamentos = useAppStore((s) => s.apartamentos);
   const faltas = useAppStore((s) => s.faltas);
   const criarArrecadacao = useAppStore((s) => s.criarArrecadacao);
+  const acessoRestrito = useLocalStore((s) => s.nivelAcesso) === "arrecadacoes";
 
   const [nomeNovo, setNomeNovo] = useState("");
   const [tipoNovo, setTipoNovo] = useState<"arrecadacao" | "armario">("arrecadacao");
@@ -57,36 +59,38 @@ export default function ArrecadacoesPage() {
         })}
       </div>
 
-      <div className="bg-white rounded-lg border border-slate-200 p-4 max-w-md">
-        <h2 className="font-medium text-sm mb-3">Adicionar nova arrecadação</h2>
-        <div className="flex flex-col gap-2">
-          <input
-            type="text"
-            placeholder="Nome (ex: Arrecadação Rato — Zona Nova)"
-            value={nomeNovo}
-            onChange={(e) => setNomeNovo(e.target.value)}
-            className="border border-slate-200 rounded-md px-2 py-1.5 text-sm"
-          />
-          <select
-            value={tipoNovo}
-            onChange={(e) => setTipoNovo(e.target.value as "arrecadacao" | "armario")}
-            className="border border-slate-200 rounded-md px-2 py-1.5 text-sm"
-          >
-            <option value="arrecadacao">Arrecadação</option>
-            <option value="armario">Armário</option>
-          </select>
-          <button
-            onClick={() => {
-              if (!nomeNovo.trim()) return;
-              criarArrecadacao(nomeNovo.trim(), tipoNovo);
-              setNomeNovo("");
-            }}
-            className="rounded-md bg-slate-900 text-white text-sm font-medium py-2 hover:bg-slate-700"
-          >
-            Criar
-          </button>
+      {!acessoRestrito && (
+        <div className="bg-white rounded-lg border border-slate-200 p-4 max-w-md">
+          <h2 className="font-medium text-sm mb-3">Adicionar nova arrecadação</h2>
+          <div className="flex flex-col gap-2">
+            <input
+              type="text"
+              placeholder="Nome (ex: Arrecadação Rato — Zona Nova)"
+              value={nomeNovo}
+              onChange={(e) => setNomeNovo(e.target.value)}
+              className="border border-slate-200 rounded-md px-2 py-1.5 text-sm"
+            />
+            <select
+              value={tipoNovo}
+              onChange={(e) => setTipoNovo(e.target.value as "arrecadacao" | "armario")}
+              className="border border-slate-200 rounded-md px-2 py-1.5 text-sm"
+            >
+              <option value="arrecadacao">Arrecadação</option>
+              <option value="armario">Armário</option>
+            </select>
+            <button
+              onClick={() => {
+                if (!nomeNovo.trim()) return;
+                criarArrecadacao(nomeNovo.trim(), tipoNovo);
+                setNomeNovo("");
+              }}
+              className="rounded-md bg-slate-900 text-white text-sm font-medium py-2 hover:bg-slate-700"
+            >
+              Criar
+            </button>
+          </div>
         </div>
-      </div>
+      )}
     </div>
   );
 }
