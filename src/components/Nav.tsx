@@ -12,6 +12,7 @@ const LINKS = [
   { href: "/compras", label: "Lista de Compras" },
   { href: "/produtos", label: "Produtos" },
   { href: "/precos", label: "Preços" },
+  { href: "/relatorios", label: "Relatórios" },
   { href: "/utilizadores", label: "Gerir acesso" },
 ];
 
